@@ -1,0 +1,18 @@
+name: "Branch Id Generator"
+decription: "Creates a short, stable ID for the current branch using PowerShell"
+runs:
+  using: "composite"
+  steps:
+    - id: make_id
+      shell: pwsh
+      run: |
+        $branch = "${env:GITHUB_REF_NAME}"
+        $bytes  = [System.Text.Encoding]::UTF8.GetBytes($branch)
+        $sha1   = [System.Security.Cryptography.SHA1]::Create().ComputeHash($bytes)
+        $hex    = -join ($sha1 | ForEach-Object { $_.ToString("x2") })
+        $id     = $hex.Substring(0,8)
+        "id=$id" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+outputs:
+  id:
+    description: "Short stable branch ID"
+    value: ${{ steps.make_id.outputs.id }}

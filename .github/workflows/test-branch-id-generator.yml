@@ -1,0 +1,24 @@
+name: Test Branch Id Generator
+on:
+  workflow_dispatch:
+
+jobs:
+  test-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate Branch Id
+        id: branch
+        uses: ./github/actions/branch-id-generator
+      
+      - name: Show Result
+        run: |
+          echo "Runner OS: ${{ matrix.os }}"
+          echo "Branch name: $env:GITHUB_REF_NAME"
+          echo "Generated ID: ${{ steps.branch.outputs.id }}"
+        shell: pwsh
