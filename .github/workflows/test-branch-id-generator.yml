@@ -14,7 +14,7 @@ jobs:
 
       - name: Generate Branch Id
         id: branch
-        uses: ./github/actions/branch-id-generator
+        uses: ./.github/actions/branch-id-generator
       
       - name: Show Result
         run: |
