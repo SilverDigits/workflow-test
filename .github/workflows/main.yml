@@ -33,7 +33,7 @@ jobs:
         -o out
 
     - name: Add signtool to PATH
-      uses: kamaranl/add-signtool-action@v2 
+      uses: kamaranl/add-signtool-action@v1 
 
     - name: Azure Login (OIDC)
       uses: azure/login@v2
