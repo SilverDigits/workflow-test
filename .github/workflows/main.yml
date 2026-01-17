@@ -1,0 +1,68 @@
+
+name: Build & Sign using AAS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-sign:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Build
+      run: >
+        dotnet publish ./src/Hoario.Cli/Hoario.Cli.csproj 
+        -c Release 
+        -r win-x64
+        --self-contained true
+        /p:PublishSingleFile=true
+        /p:DebugType=embedded
+        /p:DebugSymbols=true
+        -o out
+
+    - name: Azure Login (OIDC)
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    - name: Sign binaries using AAS
+      uses: azure/artifact-signing-action@v1
+      with:
+        account-name: silverdigits-signing
+        certificate-profile: org-public
+        files: |
+          out/**/*.exe
+          out/**/*.dll
+
+    - name: Verify signatures
+      shell: pwsh
+      run: |
+        $files = Get-ChildItem out -Include *.exe,*.dll -Recurse
+        foreach ($f in $files) {
+          Write-Host "Verifying $($f.FullName)"
+          & "C:\Program Files (x86)\Windows Kits\10\bin\x64\signtool.exe" verify /pa "$($f.FullName)"
+        }
+
+    - name: Upload artifact (whole folder)
+      uses: actions/upload-artifact@v4
+      with:
+        name: hoario-win-x64
+        path: out/**
+        if-no-files-found: error
+        retention-days: 14          # optional
+        compression-level: 6        # 0-9, optional
+        overwrite: true             # optional; replaces if artifact exists
