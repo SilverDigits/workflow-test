@@ -42,11 +42,11 @@ jobs:
     - name: Sign binaries using AAS
       uses: azure/artifact-signing-action@v1
       with:
-        account-name: silverdigits-signing
-        certificate-profile: org-public
-        files: |
-          out/**/*.exe
-          out/**/*.dll
+        endpoint: https://eus.codesigning.azure.net/
+        signing-account-name: silverdigits-signing
+        certificate-profile-name: org-public
+        file-folder: out
+        file-folder-filter: exe
 
     - name: Verify signatures
       shell: pwsh
