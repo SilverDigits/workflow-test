@@ -32,6 +32,9 @@ jobs:
         /p:DebugSymbols=true
         -o out
 
+    - name: Add signtool to PATH
+      uses: kamaranl/add-signtool-action@v2 
+
     - name: Azure Login (OIDC)
       uses: azure/login@v2
       with:
@@ -64,7 +67,7 @@ jobs:
         $files = Get-ChildItem out -Include *.exe,*.dll -Recurse
         foreach ($f in $files) {
           Write-Host "Verifying $($f.FullName)"
-          & "C:\Program Files (x86)\Windows Kits\10\bin\x64\signtool.exe" verify /pa "$($f.FullName)"
+          & "signtool.exe" verify /pa "$($f.FullName)"
         }
 
     - name: Upload artifact (whole folder)
