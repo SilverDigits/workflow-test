@@ -1,0 +1,21 @@
+name: GitVersion Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  print-version:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GitVersion
+        uses: GitTools/actions/gitversion/setup@v1
+
+      - name: Run GitVersion
+        id: gitversion
+        uses: GitTools/actions/gitversion/execute@v1
+
+      - name: Dump generated version
+        run: |
+            echo "GitVersion: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
